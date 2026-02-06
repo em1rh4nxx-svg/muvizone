@@ -1,18 +1,35 @@
-import { Link } from "react-router-dom";
-
 function MovieCard({ movie }) {
   return (
-    <Link to={`/movie/${movie.id}`} style={{ textDecoration: "none" }}>
-      <div style={{ width: "200px", color: "white" }}>
-        <img
-          src={movie.poster}
-          alt={movie.title}
-          style={{ width: "100%", borderRadius: "10px" }}
-        />
-        <h3>{movie.title}</h3>
-        <p>⭐ {movie.rating}</p>
+    <div
+      style={{
+        backgroundColor: "#111",
+        borderRadius: "10px",
+        overflow: "hidden",
+        cursor: "pointer",
+        transition: "transform 0.2s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+    >
+      <img
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : "https://via.placeholder.com/300x450?text=No+Image"
+        }
+        alt={movie.title}
+        style={{ width: "100%", display: "block" }}
+      />
+
+      <div style={{ padding: "10px" }}>
+        <h4 style={{ fontSize: "14px", margin: "0 0 6px" }}>
+          {movie.title}
+        </h4>
+        <span style={{ color: "#f5c518", fontSize: "13px" }}>
+          ⭐ {movie.vote_average?.toFixed(1)}
+        </span>
       </div>
-    </Link>
+    </div>
   );
 }
 

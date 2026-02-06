@@ -1,65 +1,91 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import MovieCard from "../components/MovieCard";
 
-const API = import.meta.env.VITE_TMDB_API_KEY;
-const IMG = "https://image.tmdb.org/t/p/w500";
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const BASE_URL = "https://api.themoviedb.org/3";
 
-export default function Home() {
+function Home() {
   const [movies, setMovies] = useState([]);
-  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
-    fetch(
-      `https://api.themoviedb.org/3/movie/popular?api_key=${API}&language=tr-TR&page=${page}`
-    )
-      .then(r => r.json())
-      .then(d => {
-        setMovies(prev => [...prev, ...(d.results || [])]);
-      });
-  }, [page]);
+    fetchPopular();
+  }, []);
+
+  useEffect(() => {
+    if (query.trim() === "") {
+      fetchPopular();
+    } else {
+      searchMovies();
+    }
+  }, [query]);
+
+  const fetchPopular = async () => {
+    const res = await fetch(
+      `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=tr-TR`
+    );
+    const data = await res.json();
+    setMovies(data.results);
+  };
+
+  const searchMovies = async () => {
+    const res = await fetch(
+      `${BASE_URL}/search/movie?api_key=${API_KEY}&language=tr-TR&query=${query}`
+    );
+    const data = await res.json();
+    setMovies(data.results);
+  };
 
   return (
-    <div style={{ padding: 40, color: "white" }}>
-      <h1>🎬 MovieRadar</h1>
-
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(180px,1fr))",
-        gap: 20
-      }}>
-        {movies.map(m => (
-          <Link
-            key={`${m.id}-${Math.random()}`}
-            to={`/movie/${m.id}`}
-            style={{ color: "white", textDecoration: "none" }}
-          >
-            <div style={{ background: "#111", borderRadius: 8 }}>
-              {m.poster_path && (
-                <img src={IMG + m.poster_path} style={{ width: "100%" }} />
-              )}
-              <div style={{ padding: 10 }}>
-                <b>{m.title}</b>
-                <div style={{ color: "#e50914" }}>⭐ {m.vote_average}</div>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      <button
-        onClick={() => setPage(p => p + 1)}
+    <div style={{ backgroundColor: "#0d0d0d", minHeight: "100vh", color: "#fff" }}>
+      
+      {/* HEADER */}
+      <header
         style={{
-          marginTop: 40,
-          padding: "10px 20px",
-          background: "#e50914",
-          color: "white",
-          border: "none",
-          fontSize: 16,
-          cursor: "pointer"
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "20px 40px",
+          borderBottom: "1px solid #1f1f1f",
         }}
       >
-        Daha Fazla Yükle
-      </button>
+        <div style={{ fontSize: "28px", fontWeight: "700", color: "#e50914" }}>
+          🎬 muvizone
+        </div>
+
+        <input
+          type="text"
+          placeholder="Film ara..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={{
+            width: "260px",
+            padding: "10px 14px",
+            borderRadius: "6px",
+            border: "none",
+            outline: "none",
+            backgroundColor: "#1a1a1a",
+            color: "#fff",
+            fontSize: "14px",
+          }}
+        />
+      </header>
+
+      {/* MOVIES */}
+      <div
+        style={{
+          padding: "40px",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+          gap: "24px",
+        }}
+      >
+        {movies.map((movie) => (
+          <MovieCard key={movie.id} movie={movie} />
+        ))}
+      </div>
     </div>
   );
 }
+
+export default Home;
